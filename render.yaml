@@ -2,11 +2,18 @@ services:
   - type: web
     name: multi-agentic-system
     runtime: python3
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT --workers 1
     plan: free
     env: python
     region: oregon
+    autoDeploy: true
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
     scaling:
       minInstances: 1
       maxInstances: 1
@@ -21,4 +28,6 @@ services:
         sync: false
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: PYTHONPATH
+        value: /opt/render/project/src
     healthCheckPath: /health

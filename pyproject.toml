@@ -1,0 +1,21 @@
+# Multi-Agentic System - FastAPI Application
+# This is NOT a Django application
+
+# Framework: FastAPI
+# Server: Uvicorn
+# Python: 3.11.0
+
+[build-system]
+requires = ["setuptools", "wheel"]
+
+[project]
+name = "multi-agentic-system"
+version = "1.0.0"
+description = "Multi-agent AI system with FastAPI backend"
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.29.0"
+]
+
+[project.scripts]
+start = "uvicorn app:app --host 0.0.0.0 --port 8000"

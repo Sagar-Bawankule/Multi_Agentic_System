@@ -1,0 +1,18 @@
+{
+  "name": "multi-agentic-system",
+  "type": "web",
+  "runtime": "python3",
+  "buildCommand": "pip install --upgrade pip && pip install -r requirements.txt",
+  "startCommand": "uvicorn app:app --host 0.0.0.0 --port $PORT --workers 1",
+  "env": "python",
+  "plan": "free",
+  "region": "oregon",
+  "healthCheckPath": "/health",
+  "autoDeploy": true,
+  "envVars": {
+    "GROQ_API_KEY": "",
+    "OPENAI_API_KEY": "",
+    "PYTHON_VERSION": "3.11.0",
+    "PYTHONPATH": "/opt/render/project/src"
+  }
+}

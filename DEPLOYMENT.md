@@ -16,12 +16,15 @@
    - Connect your GitHub repository
    - Select `Multi_Agentic_System` repository
 
-3. **Configure Service**
-   - **Name**: `multi-agentic-system` (or your preferred name)
+3. **Configure Service (IMPORTANT - Manual Override)**
+   - **Name**: `multi-agentic-system`
    - **Runtime**: `Python 3`
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `uvicorn app:app --host 0.0.0.0 --port $PORT`
+   - **Build Command**: `pip install --upgrade pip && pip install -r requirements.txt`
+   - **Start Command**: `uvicorn app:app --host 0.0.0.0 --port $PORT --workers 1`
    - **Plan**: Free (or higher for production)
+   - **Auto-Deploy**: Yes
+   
+   ⚠️ **CRITICAL**: If Render shows "Django detected", click "Override" and manually set the commands above
 
 4. **Set Environment Variables**
    Add these environment variables in Render dashboard:
