@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Environments
+.venv/
+.env
+.env.*
+
+# Logs
+logs/*.json
+
+# VSCode / IDE
+.vscode/
+.idea/
+*.swp
+
+# Byte-compiled / cache
+*.pytest_cache/
+.pytest_cache/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# System
+.DS_Store
+Thumbs.db
+
+# Vector / indexes
+vector_store/
+
+# PDFs generated
+REPORT.pdf

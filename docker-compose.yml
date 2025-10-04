@@ -1,0 +1,17 @@
+version: '3.9'
+services:
+  multi-agent-api:
+    build: .
+    container_name: multi-agent-api
+    ports:
+      - "8000:8000"
+    environment:
+      - LLM_PROVIDER=${LLM_PROVIDER}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - GROQ_MODEL=${GROQ_MODEL}
+      - LLM_MODEL=${LLM_MODEL}
+      - SERPAPI_KEY=${SERPAPI_KEY}
+    volumes:
+      - ./logs:/app/logs
+      - ./sample_pdfs:/app/sample_pdfs

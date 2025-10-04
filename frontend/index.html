@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Multi-Agent AI System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { 
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; 
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+#container { 
+  max-width: 900px; 
+  margin: 0 auto; 
+}
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: white;
+}
+.header h1 {
+  font-size: 2.5rem;
+  font-weight: 300;
+  margin-bottom: 0.5rem;
+}
+.header p {
+  opacity: 0.9;
+  font-size: 1.1rem;
+}
+.card { 
+  background: rgba(255,255,255,0.95); 
+  backdrop-filter: blur(10px);
+  padding: 2rem; 
+  margin-bottom: 1.5rem; 
+  border-radius: 16px; 
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.main-form {
+  background: white;
+}
+textarea, input[type="file"] { 
+  width: 100%; 
+  padding: 1rem; 
+  border: 2px solid #e2e8f0; 
+  border-radius: 12px; 
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+textarea:focus, input[type="file"]:focus { 
+  outline: none; 
+  border-color: #4f46e5; 
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+}
+.form-group { 
+  margin-bottom: 1.5rem; 
+}
+.form-group label { 
+  display: block; 
+  margin-bottom: 0.5rem; 
+  font-weight: 600; 
+  color: #374151;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.checkbox-group input[type="checkbox"] {
+  width: auto;
+  transform: scale(1.2);
+}
+.btn { 
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: white; 
+  border: none; 
+  padding: 1rem 2rem; 
+  border-radius: 12px; 
+  cursor: pointer; 
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(79,70,229,0.3);
+}
+.btn:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(79,70,229,0.4);
+}
+.btn:disabled { 
+  background: #9ca3af; 
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+.btn-secondary {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  box-shadow: 0 4px 15px rgba(107,114,128,0.3);
+}
+.btn-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 15px rgba(16,185,129,0.3);
+}
+.two-column {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (max-width: 768px) {
+  .two-column {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+<div id="container">
+  <div class="header">
+    <h1>🤖 Multi-Agent AI</h1>
+    <p>Intelligent document analysis, web search, and research assistant</p>
+  </div>
+  <div class="two-column">
+    <div class="card main-form">
+      <form id="ask-form">
+        <div class="form-group">
+          <label>What would you like to know?</label>
+          <textarea id="query" name="query" rows="4" 
+                    placeholder="Ask me about:&#10;• Documents in PDFs&#10;• Latest news and current events&#10;• Recent research papers&#10;• General knowledge questions"></textarea>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="use_pdf" name="use_pdf"/>
+          <label for="use_pdf" style="margin:0; text-transform:none; font-weight:normal;">Focus on PDF documents</label>
+        </div>
+        <button type="submit" class="btn">Ask AI Assistant</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <form id="upload-form">
+        <div class="form-group">
+          <label>Upload PDF Document</label>
+          <input type="file" id="pdf" name="file" accept="application/pdf" />
+        </div>
+        <button type="submit" class="btn btn-secondary">Upload</button>
+        <p style="margin-top: 1rem; font-size: 0.85rem; color: #6b7280; line-height: 1.4;">
+          Upload PDFs to make them searchable. Files are processed locally and not stored permanently.
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <div class="card" id="result" style="display:none;">
+    <div style="margin-bottom: 1.5rem;">
+      <h2 style="color: #1f2937; margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 600;">Response</h2>
+      <div id="agents" style="margin-bottom: 1rem;"></div>
+    </div>
+    <div id="answer" style="background: #f8fafc; padding: 1.5rem; border-radius: 12px; white-space: pre-wrap; line-height: 1.6; border-left: 4px solid #4f46e5;"></div>
+    <details style="margin-top: 1.5rem; cursor: pointer;">
+      <summary style="font-weight: 600; color: #4b5563; padding: 0.5rem 0;">Show technical details</summary>
+      <div style="margin-top: 1rem; padding: 1rem; background: #f9fafb; border-radius: 8px;">
+        <div style="margin-bottom: 1rem;">
+          <strong style="color: #374151;">Decision Process:</strong>
+          <p id="rationale" style="margin-top: 0.5rem; color: #6b7280; font-style: italic;"></p>
+        </div>
+        <details style="margin-bottom: 1rem;">
+          <summary style="font-weight: 500; color: #4b5563;">Agent Performance</summary>
+          <pre id="agentRunInfo" style="margin-top: 0.5rem; background: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 6px; overflow: auto; max-height: 200px; font-size: 0.85rem;"></pre>
+        </details>
+        <details>
+          <summary style="font-weight: 500; color: #4b5563;">Source Documents</summary>
+          <pre id="documents" style="margin-top: 0.5rem; background: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 6px; overflow: auto; max-height: 300px; font-size: 0.85rem;"></pre>
+        </details>
+      </div>
+    </details>
+  </div>
+
+  <div class="card">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+      <h3 style="color: #1f2937; margin: 0;">System Status</h3>
+      <div>
+        <button onclick="loadExtendedHealth()" class="btn btn-success" style="padding: 0.5rem 1rem; font-size: 0.9rem; margin-right: 0.5rem;">Health Check</button>
+        <button onclick="clearLogsUI()" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Clear</button>
+      </div>
+    </div>
+    <pre id="healthx" style="background: #064e3b; color: #6ee7b7; padding: 1rem; border-radius: 8px; max-height: 200px; overflow: auto; font-size: 0.85rem;"></pre>
+  </div>
+</div>
+<script>
+// Agent type to emoji and color mapping
+const agentStyles = {
+  'llm': { emoji: '🧠', color: '#8b5cf6', name: 'AI Assistant' },
+  'pdf_rag': { emoji: '📄', color: '#ef4444', name: 'PDF Analyzer' },
+  'web_search': { emoji: '🌐', color: '#06b6d4', name: 'Web Search' },
+  'arxiv': { emoji: '📚', color: '#f59e0b', name: 'Research Papers' }
+};
+
+function createAgentBadge(agentType) {
+  const style = agentStyles[agentType] || { emoji: '🤖', color: '#6b7280', name: agentType };
+  return `<span style="display: inline-flex; align-items: center; gap: 0.5rem; background: ${style.color}15; color: ${style.color}; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem; font-weight: 600; margin: 0.25rem;">
+    ${style.emoji} ${style.name}
+  </span>`;
+}
+
+async function askQuery(e){
+  e.preventDefault();
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  const originalText = submitBtn.textContent;
+  
+  // Show loading state
+  submitBtn.textContent = '🤔 Thinking...';
+  submitBtn.disabled = true;
+  
+  const formData = new FormData();
+  formData.append('query', document.getElementById('query').value);
+  formData.append('use_pdf', document.getElementById('use_pdf').checked);
+  
+  let data;
+  try {
+    const res = await fetch('/ask', { method:'POST', body: formData });
+    data = await res.json();
+  } catch(err) {
+    showNotification('Request failed: ' + err, 'error');
+    return;
+  } finally {
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+  }
+  
+  // Show result
+  const resultDiv = document.getElementById('result');
+  resultDiv.style.display = 'block';
+  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  
+  document.getElementById('answer').innerText = data.final_answer || 'No response generated.';
+  document.getElementById('agents').innerHTML = (data.agents_invoked || [])
+    .map(agent => createAgentBadge(agent)).join('');
+  document.getElementById('rationale').innerText = data.decision_rationale || '';
+  document.getElementById('documents').textContent = JSON.stringify(data.documents, null, 2);
+  document.getElementById('agentRunInfo').textContent = JSON.stringify(data.agent_run_info || [], null, 2);
+}
+
+async function uploadPdf(e){
+  e.preventDefault();
+  const f = document.getElementById('pdf').files[0];
+  if(!f){ 
+    showNotification('Please select a PDF file first', 'warning');
+    return; 
+  }
+  
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  const originalText = submitBtn.textContent;
+  submitBtn.textContent = '📤 Uploading...';
+  submitBtn.disabled = true;
+  
+  try {
+    const fd = new FormData();
+    fd.append('file', f);
+    const res = await fetch('/upload_pdf', { method:'POST', body: fd });
+    const data = await res.json();
+    
+    if (data.status === 'uploaded') {
+      showNotification(`✅ PDF "${f.name}" uploaded successfully!`, 'success');
+      document.getElementById('pdf').value = ''; // Clear file input
+    } else {
+      showNotification('Upload failed: ' + JSON.stringify(data), 'error');
+    }
+  } catch(err) {
+    showNotification('Upload failed: ' + err, 'error');
+  } finally {
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+  }
+}
+
+function showNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  const colors = {
+    success: '#10b981',
+    error: '#ef4444', 
+    warning: '#f59e0b',
+    info: '#3b82f6'
+  };
+  
+  notification.style.cssText = `
+    position: fixed; top: 20px; right: 20px; z-index: 1000;
+    background: ${colors[type]}; color: white;
+    padding: 1rem 1.5rem; border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    font-weight: 500; max-width: 400px;
+    animation: slideIn 0.3s ease;
+  `;
+  
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => notification.remove(), 300);
+  }, 4000);
+}
+
+function clearLogsUI(){
+  document.getElementById('healthx').textContent = '';
+}
+
+async function loadExtendedHealth(){
+  const healthDiv = document.getElementById('healthx');
+  healthDiv.textContent = '🔄 Checking system health...';
+  
+  try {
+    const res = await fetch('/health/extended');
+    const h = await res.json();
+    healthDiv.textContent = JSON.stringify(h, null, 2);
+  } catch(e){
+    healthDiv.textContent = '❌ Health check failed: ' + e;
+  }
+}
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+  }
+`;
+document.head.appendChild(style);
+
+// Event listeners
+document.getElementById('ask-form').addEventListener('submit', askQuery);
+document.getElementById('upload-form').addEventListener('submit', uploadPdf);
+
+// Auto-focus query input
+document.getElementById('query').focus();
+</script>
+</body>
+</html>
