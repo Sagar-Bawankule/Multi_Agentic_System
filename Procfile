@@ -1,2 +1,2 @@
-web: uvicorn app:app --host 0.0.0.0 --port $PORT --workers 1
-release: echo "Multi-Agentic System release phase"
+# EXPLICIT: FastAPI Application - NOT Django
+web: python -m uvicorn app:app --host 0.0.0.0 --port $PORT

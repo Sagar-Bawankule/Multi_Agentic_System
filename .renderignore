@@ -1,0 +1,20 @@
+# RENDER: DO NOT AUTO-DETECT DJANGO
+# This application uses:
+# - Framework: FastAPI  
+# - Server: Uvicorn
+# - Entry Point: app.py
+# - Command: python -m uvicorn app:app --host 0.0.0.0 --port $PORT
+
+# Ignore Django detection patterns
+manage.py
+*/manage.py
+**/manage.py
+wsgi.py
+*/wsgi.py  
+**/wsgi.py
+settings.py
+*/settings.py
+**/settings.py
+django/
+*/django/
+**/django/

@@ -1,18 +1,21 @@
 {
   "name": "multi-agentic-system",
-  "type": "web",
+  "type": "web", 
   "runtime": "python3",
-  "buildCommand": "pip install --upgrade pip && pip install -r requirements.txt",
-  "startCommand": "uvicorn app:app --host 0.0.0.0 --port $PORT --workers 1",
+  "buildCommand": "pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt",
+  "startCommand": "python -m uvicorn app:app --host 0.0.0.0 --port $PORT",
   "env": "python",
   "plan": "free",
   "region": "oregon",
   "healthCheckPath": "/health",
   "autoDeploy": true,
+  "framework": "fastapi",
+  "buildpack": "python",
   "envVars": {
     "GROQ_API_KEY": "",
     "OPENAI_API_KEY": "",
-    "PYTHON_VERSION": "3.11.0",
-    "PYTHONPATH": "/opt/render/project/src"
+    "FASTAPI_APP": "true",
+    "NOT_DJANGO": "true",
+    "DISABLE_DJANGO_DETECTION": "true"
   }
 }
