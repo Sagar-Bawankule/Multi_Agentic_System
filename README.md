@@ -135,12 +135,37 @@ Sources list each chunk: source filename, chunk index, preview, score.
 ## LLM Integration
 `call_llm_api` supports: Groq, Gemini, OpenAI, custom (Ollama), echo fallback. Errors degrade gracefully to echo. Provide only needed keys. Custom expects an Ollama-compatible `/api/chat` JSON interface.
 
-## Deployment (Render / Hugging Face Spaces)
-1. Set environment variables in dashboard (never commit secrets).
-2. Start command: `uvicorn app:app --host 0.0.0.0 --port $PORT`
-3. Expose port 8000.
-4. (Optional) Pre-ingest PDFs at startup (already auto-ingests `sample_pdfs/`).
-5. Add a persistent volume if long-term PDF retention required (currently ephemeral).
+## Deployment
+
+### Quick Deploy to Render
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
+
+1. **Connect Repository**: Link your GitHub repository to Render
+2. **Configure Service**:
+   ```
+   Build Command: pip install -r requirements.txt
+   Start Command: uvicorn app:app --host 0.0.0.0 --port $PORT
+   ```
+3. **Set Environment Variables** in Render dashboard:
+   ```
+   GROQ_API_KEY=your_groq_api_key_here
+   OPENAI_API_KEY=your_openai_key (optional)
+   LLM_PROVIDER=groq
+   ```
+4. **Deploy**: Render will automatically build and deploy your app
+
+### Deploy to HuggingFace Spaces
+1. Create new Space with Docker SDK
+2. Upload project files
+3. Use `Dockerfile.huggingface` for HF-specific configuration
+4. Set environment variables in Space settings
+
+### Alternative: Manual Deploy
+See detailed instructions in [DEPLOYMENT.md](./DEPLOYMENT.md) for:
+- Step-by-step Render deployment
+- HuggingFace Spaces deployment  
+- Environment configuration
+- Troubleshooting guide
 
 ## Security & Privacy
 - PDF size limited to 5MB.
