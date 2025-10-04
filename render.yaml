@@ -7,28 +7,18 @@ services:
     plan: free
     env: python
     region: oregon
-    services:
-      - type: web
-        name: multi-agentic-system
-        runtime: python3
-        buildCommand: pip install -r requirements.txt
-        # Use gunicorn with uvicorn workers (robust for Render)
-        startCommand: gunicorn -k uvicorn.workers.UvicornWorker app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
-        plan: free
-        env: python
-        region: oregon
-        scaling:
-          minInstances: 1
-          maxInstances: 1
-        envVars:
-          - key: GROQ_API_KEY
-            sync: false
-          - key: OPENAI_API_KEY
-            sync: false
-          - key: GOOGLE_API_KEY
-            sync: false
-          - key: SERPAPI_KEY
-            sync: false
-          - key: PYTHON_VERSION
-            value: 3.11.0
-        healthCheckPath: /health
+    scaling:
+      minInstances: 1
+      maxInstances: 1
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: SERPAPI_KEY
+        sync: false
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    healthCheckPath: /health
