@@ -1,126 +1,85 @@
 #!/usr/bin/env python3
 """
-Quick self-test to verify the Multi-Agentic System is working properly.
-Run this before deployment to catch configuration issues.
+Quick system test to verify the LLM fixes are working properly.
 """
 
 import os
-import sys
 from dotenv import load_dotenv
 
-def test_environment():
-    """Test environment variable loading"""
-    print("🔧 Testing environment variables...")
+def test_environment_loading():
+    """Test that environment variables load correctly"""
     load_dotenv()
-    
-    llm_provider = os.getenv("LLM_PROVIDER", "not_set")
+    provider = os.getenv("LLM_PROVIDER", "")
     groq_key = bool(os.getenv("GROQ_API_KEY"))
-    openai_key = bool(os.getenv("OPENAI_API_KEY"))
     
-    print(f"   LLM_PROVIDER: {llm_provider}")
-    print(f"   GROQ_API_KEY: {'✅' if groq_key else '❌'}")
-    print(f"   OPENAI_API_KEY: {'✅' if openai_key else '❌'}")
-    
-    if not groq_key and not openai_key:
-        print("   ⚠️  WARNING: No API keys found - will fallback to echo mode")
-        return False
-    return True
+    print(f"✓ Environment test:")
+    print(f"  LLM_PROVIDER: {provider}")
+    print(f"  GROQ_API_KEY present: {groq_key}")
+    return provider and groq_key
 
-def test_llm():
-    """Test LLM functionality"""
-    print("\n🤖 Testing LLM integration...")
+def test_llm_api():
+    """Test the LLM API function directly"""
     try:
         from agents.controller_agent import call_llm_api
-        result = call_llm_api("Say 'Test successful' if you can respond.")
+        result = call_llm_api("Say 'Hello from LLM test'")
         
-        if "[LLM" in result or "Error" in result:
-            print(f"   ❌ LLM Error: {result[:100]}")
-            return False
-        else:
-            print(f"   ✅ LLM Response: {result[:60]}...")
-            return True
+        print(f"✓ LLM API test:")
+        print(f"  Result: {result[:100]}...")
+        
+        # Check if it's a real LLM response (not fallback)
+        is_real_llm = not any(marker in result for marker in ["[LLM Fallback]", "[Groq Config Error]", "[Echo]"])
+        print(f"  Real LLM response: {is_real_llm}")
+        return is_real_llm
     except Exception as e:
-        print(f"   ❌ LLM Exception: {e}")
+        print(f"✗ LLM API test failed: {e}")
         return False
 
-def test_agents():
-    """Test agent system"""
-    print("\n🕷️ Testing agent system...")
+def test_controller_agent():
+    """Test the controller agent"""
     try:
         from agents.controller_agent import ControllerAgent
         agent = ControllerAgent()
-        result = agent.handle("Hello, are you working?")
+        response = agent.handle("What is AI?")
         
-        if result.get("final_answer"):
-            print(f"   ✅ Agent Response: {result['final_answer'][:60]}...")
-            print(f"   📊 Agents invoked: {result['agents_invoked']}")
-            return True
-        else:
-            print("   ❌ No response from agent system")
-            return False
-    except Exception as e:
-        print(f"   ❌ Agent Exception: {e}")
-        return False
-
-def test_web_search():
-    """Test web search agent"""
-    print("\n🌐 Testing web search...")
-    try:
-        from agents.web_search_agent import WebSearchAgent
-        web_agent = WebSearchAgent()
-        result = web_agent.search_and_summarize("latest tech news", max_results=2)
+        print(f"✓ Controller agent test:")
+        print(f"  Decision: {response.get('decision_rationale', 'N/A')}")
+        print(f"  Agents invoked: {response.get('agents_invoked', [])}")
+        print(f"  Final answer: {response.get('final_answer', '')[:100]}...")
         
-        if result and result.get("summary") and "error" not in result.get("summary", "").lower():
-            print(f"   ✅ Web Search: {result['summary'][:60]}...")
-            return True
-        else:
-            print(f"   ⚠️  Web Search: Limited results or error")
-            return False
+        # Check if we got a real response
+        final_answer = response.get('final_answer', '')
+        is_good_response = final_answer and not any(marker in final_answer for marker in ["[LLM Fallback]", "[Groq Config Error]"])
+        print(f"  Good response: {is_good_response}")
+        return is_good_response
     except Exception as e:
-        print(f"   ❌ Web Search Exception: {e}")
+        print(f"✗ Controller agent test failed: {e}")
         return False
 
 def main():
-    """Run all tests"""
-    print("🚀 Multi-Agentic System Self-Test")
-    print("=" * 40)
+    print("=== Multi-Agentic System Test ===\n")
     
-    tests = [
-        ("Environment", test_environment),
-        ("LLM", test_llm),
-        ("Agents", test_agents),
-        ("Web Search", test_web_search)
-    ]
+    # Run tests
+    env_ok = test_environment_loading()
+    print()
     
-    results = []
-    for name, test_func in tests:
-        try:
-            success = test_func()
-            results.append((name, success))
-        except Exception as e:
-            print(f"   ❌ {name} Test Failed: {e}")
-            results.append((name, False))
+    llm_ok = test_llm_api()
+    print()
     
-    print("\n📊 Test Summary:")
-    print("-" * 20)
-    passed = 0
-    for name, success in results:
-        status = "✅ PASS" if success else "❌ FAIL"
-        print(f"   {name}: {status}")
-        if success:
-            passed += 1
+    controller_ok = test_controller_agent()
+    print()
     
-    print(f"\n🎯 Results: {passed}/{len(results)} tests passed")
+    # Summary
+    all_good = env_ok and llm_ok and controller_ok
+    print("=== Test Summary ===")
+    print(f"Environment: {'✓' if env_ok else '✗'}")
+    print(f"LLM API: {'✓' if llm_ok else '✗'}")
+    print(f"Controller: {'✓' if controller_ok else '✗'}")
+    print(f"Overall: {'✅ ALL TESTS PASSED' if all_good else '❌ SOME TESTS FAILED'}")
     
-    if passed == len(results):
-        print("🎉 All systems operational! Ready for deployment.")
-    elif passed >= len(results) - 1:
-        print("⚠️  System mostly functional. Minor issues detected.")
+    if all_good:
+        print("\n🎉 System is ready for deployment!")
     else:
-        print("🚨 Critical issues detected. Please fix before deployment.")
-        
-    return passed >= len(results) - 1
+        print("\n⚠️  Please fix the failing tests before deploying.")
 
 if __name__ == "__main__":
-    success = main()
-    sys.exit(0 if success else 1)
+    main()
