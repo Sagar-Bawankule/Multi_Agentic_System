@@ -11,7 +11,13 @@ def call_llm_api(prompt: str) -> str:
 
     Fallback: echo placeholder to keep system functional without keys.
     """
-    provider = os.getenv("LLM_PROVIDER", "").lower().strip()
+    provider = os.getenv("LLM_PROVIDER", "groq").lower().strip()  # Default to groq
+    
+    # Debug logging for production troubleshooting
+    print(f"[DEBUG] LLM_PROVIDER: '{provider}'")
+    print(f"[DEBUG] GROQ_API_KEY present: {bool(os.getenv('GROQ_API_KEY'))}")
+    print(f"[DEBUG] OPENAI_API_KEY present: {bool(os.getenv('OPENAI_API_KEY'))}")
+    
     try:
         if provider == "openai":
             # OpenAI Python SDK v1 style
@@ -29,9 +35,16 @@ def call_llm_api(prompt: str) -> str:
             )
             return resp.choices[0].message.content.strip()
         elif provider == "groq":
+            groq_key = os.getenv("GROQ_API_KEY")
+            if not groq_key:
+                print("[ERROR] GROQ_API_KEY not found in environment variables")
+                return f"[Groq Config Error] Missing GROQ_API_KEY. Query: {prompt[:200]}"
+            
             from groq import Groq
-            client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+            client = Groq(api_key=groq_key)
             model = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
+            print(f"[DEBUG] Using Groq model: {model}")
+            
             resp = client.chat.completions.create(
                 model=model,
                 messages=[
@@ -90,9 +103,13 @@ def call_llm_api(prompt: str) -> str:
         elif provider == "echo":
             return f"[Echo]\n{prompt[:500]}"
     except Exception as e:
-        return f"[LLM Provider Error: {type(e).__name__}] Fallback echo: {prompt[:400]}"
-    # Fallback if provider unset
-    return f"[LLM Fallback]\nEcho: {prompt[:500]}"
+        error_msg = f"[LLM Provider Error: {type(e).__name__}: {str(e)}]"
+        print(f"[ERROR] {error_msg}")
+        return f"{error_msg} Fallback echo: {prompt[:400]}"
+    
+    # Fallback if provider unset or not recognized
+    print(f"[WARNING] Unrecognized LLM provider: '{provider}'. Available: groq, openai, gemini, custom, echo")
+    return f"[LLM Config Error] Unknown provider '{provider}'. Echo: {prompt[:500]}"
 
 class ControllerAgent:
     """Controller agent that decides which specialized agents to invoke based on query and context."""

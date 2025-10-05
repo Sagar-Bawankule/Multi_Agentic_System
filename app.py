@@ -110,6 +110,29 @@ async def health_extended():
         "arxiv_ready": True
     }
 
+@app.get("/debug/env")
+async def debug_env():
+    """Debug endpoint to check environment variables in production"""
+    return {
+        "LLM_PROVIDER": os.getenv("LLM_PROVIDER", "NOT_SET"),
+        "GROQ_API_KEY_present": bool(os.getenv("GROQ_API_KEY")),
+        "GROQ_API_KEY_length": len(os.getenv("GROQ_API_KEY", "")) if os.getenv("GROQ_API_KEY") else 0,
+        "OPENAI_API_KEY_present": bool(os.getenv("OPENAI_API_KEY")),
+        "SERPAPI_KEY_present": bool(os.getenv("SERPAPI_KEY")),
+        "PORT": os.getenv("PORT", "NOT_SET"),
+        "all_env_keys": [k for k in os.environ.keys() if any(x in k.upper() for x in ["GROQ", "OPENAI", "LLM", "API"])]
+    }
+
+@app.get("/debug/llm")
+async def debug_llm():
+    """Debug endpoint to test LLM directly"""
+    from agents.controller_agent import call_llm_api
+    try:
+        result = call_llm_api("Say 'Hello from LLM' and confirm you are working.")
+        return {"status": "success", "llm_response": result}
+    except Exception as e:
+        return {"status": "error", "error": f"{type(e).__name__}: {str(e)}"}
+
 @app.get("/agents/status")
 async def agents_status():
     pdf_mode = "none"
