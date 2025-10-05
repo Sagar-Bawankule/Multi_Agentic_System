@@ -26,7 +26,9 @@
    
    ⚠️ **CRITICAL**: If Render shows "Django detected", click "Override" and manually set the commands above
 
-4. **Set Environment Variables**
+4. **Set Environment Variables (CRITICAL)**
+   **⚠️ IMPORTANT**: If your app returns "[LLM Fallback]" responses, the environment variables are not set correctly.
+   
    Add these environment variables in Render dashboard:
    ```
    GROQ_API_KEY=your_groq_api_key_here
@@ -35,6 +37,8 @@
    SERPAPI_KEY=your_serpapi_key_here (optional)
    LLM_PROVIDER=groq
    ```
+   
+   **📖 See [RENDER_ENV_SETUP.md](RENDER_ENV_SETUP.md) for detailed environment setup guide and troubleshooting.**
 
 5. **Deploy**
    - Click "Create Web Service"
@@ -139,6 +143,34 @@ After deployment, test these endpoints:
 - Free tier has limitations (sleep after inactivity)
 - Consider upgrading to paid plans for production use
 - Optimize for cold start times
+
+## Troubleshooting
+
+### Common Issues
+
+**❌ "[LLM Fallback]" responses**
+- **Cause**: Environment variables not set in Render
+- **Solution**: See [RENDER_ENV_SETUP.md](RENDER_ENV_SETUP.md) for complete setup guide
+- **Quick Check**: Visit `https://your-app.onrender.com/debug/env` to verify variables
+
+**❌ "gunicorn: command not found"**
+- **Cause**: Render auto-detected Django
+- **Solution**: Manually override Build/Start commands in Render dashboard
+
+**❌ "python-multipart" errors**
+- **Cause**: Missing dependency for file uploads
+- **Solution**: Ensure `python-multipart` is in requirements.txt (already included)
+
+**❌ "fcntl" errors on Windows**
+- **Cause**: Platform-specific module conflict
+- **Solution**: Use Uvicorn instead of Gunicorn (already configured)
+
+### Debug Endpoints
+
+Use these endpoints to diagnose issues:
+- `/debug/env` - Check environment variables
+- `/debug/llm` - Test LLM connection directly
+- `/health/extended` - Overall system health
 
 ## Monitoring
 
