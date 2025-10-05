@@ -122,11 +122,29 @@ class ControllerAgent:
         if has_pdf or "pdf" in q_lower:
             rationale_parts.append("Detected PDF context (upload flag or keyword). Routing to PDF RAG agent.")
             agents_to_call.append("pdf_rag")
-        if any(k in q_lower for k in ["recent papers", "arxiv", "research"]):
+        if any(k in q_lower for k in ["recent papers", "arxiv", "research", "paper", "academic", "journal", "study", "publication"]):
             rationale_parts.append("Detected scholarly research intent. Routing to ArXiv agent.")
             agents_to_call.append("arxiv")
-        if any(k in q_lower for k in ["latest news", "recent developments", "breaking news", "current events", "sports news", "sports", "latest sports", "today's news", "news today", "current news", "business news", "latest business", "market news", "finance news", "economy news", "business updates", "stock market", "market updates", "market today", "stocks today"]):
-            rationale_parts.append("Detected need for current events, sports, or business news. Routing to Web Search agent.")
+        
+        # Enhanced web search detection with more comprehensive keywords
+        web_keywords = [
+            # News keywords
+            "latest news", "recent developments", "breaking news", "current events", "today's news", "news today", "current news",
+            # Business/Finance
+            "business news", "latest business", "market news", "finance news", "economy news", "business updates", 
+            "stock market", "market updates", "market today", "stocks today", "earnings", "revenue",
+            # Sports
+            "sports news", "sports", "latest sports", "sports update", "game results", "match results",
+            # Technology
+            "tech news", "technology news", "latest tech", "tech updates", "ai news", "startup news",
+            # Time-sensitive indicators
+            "latest", "recent", "today", "yesterday", "this week", "breaking", "current", "now", "update", "new",
+            # General web search indicators
+            "what's happening", "what happened", "recent events", "trending", "viral", "popular"
+        ]
+        
+        if any(k in q_lower for k in web_keywords):
+            rationale_parts.append("Detected need for current/real-time information. Routing to Web Search agent.")
             agents_to_call.append("web_search")
 
         if not agents_to_call:
